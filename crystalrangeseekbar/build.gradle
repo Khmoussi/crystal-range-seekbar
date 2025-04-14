@@ -1,16 +1,13 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'  // Adding the maven-publish plugin
 
 ext {
-    // Where you will see your artifact in Bintray's web interface
-    // The "bintrayName" should match the name of the Bintray repro.
-    bintrayRepo = 'maven'
+    bintrayRepo = 'maven'  // This is still used but we will replace it with mavenCentral
     bintrayName = 'crystalrangeseekbar'
 
     // Maven metadata
     publishedGroupId = 'com.crystal'
     libraryName = 'CrystalRangeSeekbar'
-    // Save yourself a head ache, and set this equal to the name of the Android Studio library
-    // module. The artifact name needs to match the name of the library.
     artifact = 'crystalrangeseekbar'
 
     libraryDescription = 'An extended version of android range seekbar.'
@@ -38,6 +35,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -47,10 +45,57 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:27.0.2'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
 }
 
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = publishedGroupId
+            artifactId = artifact
+            version = libraryVersion
+
+            from components.release  // Use the release component for publication
+
+            pom {
+                name = libraryName
+                description = libraryDescription
+                url = gitUrl
+
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:$gitUrl"
+                    developerConnection = "scm:git:$gitUrl"
+                    url = gitUrl
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'MavenCentral'
+            url = uri("https://repo.maven.apache.org/maven2")
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
